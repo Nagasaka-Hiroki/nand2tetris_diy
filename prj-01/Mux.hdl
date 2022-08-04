@@ -1,0 +1,49 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/Mux.hdl
+
+/** 
+ * Multiplexor:
+ * out = a if sel == 0
+ *       b otherwise
+ */
+
+CHIP Mux {
+    IN a, b, sel;
+    OUT out;
+
+    PARTS:
+    // Put your code here:
+    // Not演算は3文字で長いので、 Not(a) == !a　と短縮する。
+    // Mux( a, b, sel) = a*!b*!sel + a*b*!sel + !a*b*sel + a*b*sel
+    // !aを作る
+    Not( in=a, out=nota);
+    // !bを作る
+    Not( in=b, out=notb);
+    // !selを作る
+    Not( in=sel, out=notsel);
+
+    // a*!b*!sel を計算する。 -> term1
+    And( a=a, b=notb, out=a-and-notb);
+    And( a=a-and-notb, b=notsel, out=term1);
+
+    // a* b*!sel を計算する。 -> term2
+    And( a=a, b=b, out=a-and-b);
+    And( a=a-and-b, b=notsel, out=term2);
+
+    //!a* b* sel を計算する。 -> term3
+    And( a=nota, b=b, out=nota-and-b);
+    And( a=nota-and-b, b=sel, out=term3);
+
+    // a* b* sel を計算する。 -> term4
+    And( a=a-and-b, b=sel, out=term4);
+
+    // term1 + term2 -> term1-2
+    Or( a=term1, b=term2, out=term1-2);
+    // term3 + term4 -> term3-4
+    Or( a=term3, b=term4, out=term3-4);
+    
+    // term1-2 + term3-4 -> out
+    Or( a=term1-2, b=term3-4, out=out);
+}
