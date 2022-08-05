@@ -13,10 +13,10 @@
 
 実装した順番を簡単にメモする。
 1.  Not
-2.  Nand
+2.  And
 3.  Or
 4.  Xor
-5.  Multiplexor(マルチプレクサ) -> Mux16
+5.  Multiplexor(マルチプレクサ) -> Mux
 6.  Demultiplexor (デマルチプレクサ) -> DMux
 7.  多ビットNot -> Not16
 8.  多ビットAnd -> And16
