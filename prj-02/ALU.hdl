@@ -1,0 +1,294 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/02/ALU.hdl
+
+/**
+ * The ALU (Arithmetic Logic Unit).
+ * Computes one of the following functions:
+ * x+y, x-y, y-x, 0, 1, -1, x, y, -x, -y, !x, !y,
+ * x+1, y+1, x-1, y-1, x&y, x|y on two 16-bit inputs, 
+ * according to 6 input bits denoted zx,nx,zy,ny,f,no.
+ * In addition, the ALU computes two 1-bit outputs:
+ * if the ALU output == 0, zr is set to 1; otherwise zr is set to 0;
+ * if the ALU output < 0, ng is set to 1; otherwise ng is set to 0.
+ */
+
+// Implementation: the ALU logic manipulates the x and y inputs
+// and operates on the resulting values, as follows:
+// if (zx == 1) set x = 0        // 16-bit constant
+// if (nx == 1) set x = !x       // bitwise not
+// if (zy == 1) set y = 0        // 16-bit constant
+// if (ny == 1) set y = !y       // bitwise not
+// if (f == 1)  set out = x + y  // integer 2's complement addition
+// if (f == 0)  set out = x & y  // bitwise and
+// if (no == 1) set out = !out   // bitwise not
+// if (out == 0) set zr = 1
+// if (out < 0) set ng = 1
+
+CHIP ALU {
+    IN  
+        x[16], y[16],  // 16-bit inputs        
+        zx, // zero the x input?
+        nx, // negate the x input?
+        zy, // zero the y input?
+        ny, // negate the y input?
+        f,  // compute out = x + y (if 1) or x & y (if 0)
+        no; // negate the out output?
+
+    OUT 
+        out[16], // 16-bit output
+        zr, // 1 if (out == 0), 0 otherwise
+        ng; // 1 if (out < 0),  0 otherwise
+
+    PARTS:
+   // Put you code here:
+
+   //実装の方針は長くなるのでREADME.mdに記載
+
+//xを制御する。
+    //Zero_or_Notゲートを作る。
+    //Zero-or-Not(zx, x[16]) = !zx*x -> x-Zero-or-Not-zx
+        //!zxを計算する -> not-zx
+        Not( in=zx, out=not-zx);
+        //Zero-or-Notの出力をする -> x-Zero-or-Not-zx
+    And16( a[0] =not-zx,
+           a[1] =not-zx,
+           a[2] =not-zx,
+           a[3] =not-zx,
+           a[4] =not-zx,
+           a[5] =not-zx,
+           a[6] =not-zx,
+           a[7] =not-zx,
+           a[8] =not-zx,
+           a[9] =not-zx,
+           a[10]=not-zx,
+           a[11]=not-zx,
+           a[12]=not-zx,
+           a[13]=not-zx,
+           a[14]=not-zx,
+           a[15]=not-zx,
+           b=x, out=x-Zero-or-Not-zx);
+
+    //Zero-or-NotゲートとInv_or_Notゲートを直列で接続する。
+    //Inv_or_Notゲートを作る。
+    //Inv_or_Not(nx,x-Zero-or-Not-zx[16]) -> x-Inv-or-Not-nx
+        //!nxを計算 -> not-nx
+        Not( in=nx, out=not-nx);
+        //!x-Zero-or-Not-zxを計算 -> not-x-Zero-or-Not-zx
+        Not16( in=x-Zero-or-Not-zx, out=not-x);
+        //not-nx*x-Zero-or-Not-zxを計算 -> not-nx-x
+        And16( a[0] =not-nx,
+               a[1] =not-nx,
+               a[2] =not-nx,
+               a[3] =not-nx,
+               a[4] =not-nx,
+               a[5] =not-nx,
+               a[6] =not-nx,
+               a[7] =not-nx,
+               a[8] =not-nx,
+               a[9] =not-nx,
+               a[10]=not-nx,
+               a[11]=not-nx,
+               a[12]=not-nx,
+               a[13]=not-nx,
+               a[14]=not-nx,
+               a[15]=not-nx,
+               b=x-Zero-or-Not-zx, out=not-nx-x);
+        //nx*not-xを計算 -> nx-not-x
+        And16( a[0] =nx,
+               a[1] =nx,
+               a[2] =nx,
+               a[3] =nx,
+               a[4] =nx,
+               a[5] =nx,
+               a[6] =nx,
+               a[7] =nx,
+               a[8] =nx,
+               a[9] =nx,
+               a[10]=nx,
+               a[11]=nx,
+               a[12]=nx,
+               a[13]=nx,
+               a[14]=nx,
+               a[15]=nx,
+               b=not-x, out=nx-not-x);
+        //Inv_or_Notの出力をする。 -> x-Inv-or-Not-nx
+    Or16( a=not-nx-x, b=nx-not-x, out=x-Inv-or-Not-nx);
+//(zx,nx)でxを制御完了。
+
+//yを制御する。
+    //Zero_or_Notゲートを作る。
+    //Zero-or-Not(zy, y[16]) = !zy*y -> y-Zero-or-Not-zy
+        //!zyを計算する -> not-zy
+        Not( in=zy, out=not-zy);
+        //Zero-or-Notの出力をする -> y-Zero-or-Not-zy
+    And16( a[0] =not-zy,
+           a[1] =not-zy,
+           a[2] =not-zy,
+           a[3] =not-zy,
+           a[4] =not-zy,
+           a[5] =not-zy,
+           a[6] =not-zy,
+           a[7] =not-zy,
+           a[8] =not-zy,
+           a[9] =not-zy,
+           a[10]=not-zy,
+           a[11]=not-zy,
+           a[12]=not-zy,
+           a[13]=not-zy,
+           a[14]=not-zy,
+           a[15]=not-zy,
+           b=y, out=y-Zero-or-Not-zy);
+
+    //Zero-or-NotゲートとInv_or_Notゲートを直列で接続する。
+    //Inv_or_Notゲートを作る。
+    //Inv_or_Not(ny,y-Zero-or-Not-zy[16]) -> y-Inv-or-Not-ny
+        //!nyを計算 -> not-ny
+        Not( in=ny, out=not-ny);
+        //!y-Zero-or-Not-zyを計算 -> not-y
+        Not16( in=y-Zero-or-Not-zy, out=not-y);
+        //not-ny*y-Zero-or-Not-zyを計算 -> not-ny-y
+        And16( a[0] =not-ny,
+               a[1] =not-ny,
+               a[2] =not-ny,
+               a[3] =not-ny,
+               a[4] =not-ny,
+               a[5] =not-ny,
+               a[6] =not-ny,
+               a[7] =not-ny,
+               a[8] =not-ny,
+               a[9] =not-ny,
+               a[10]=not-ny,
+               a[11]=not-ny,
+               a[12]=not-ny,
+               a[13]=not-ny,
+               a[14]=not-ny,
+               a[15]=not-ny,
+               b=y-Zero-or-Not-zy, out=not-ny-y);
+        //ny*not-yを計算 -> ny-not-y
+        And16( a[0] =ny,
+               a[1] =ny,
+               a[2] =ny,
+               a[3] =ny,
+               a[4] =ny,
+               a[5] =ny,
+               a[6] =ny,
+               a[7] =ny,
+               a[8] =ny,
+               a[9] =ny,
+               a[10]=ny,
+               a[11]=ny,
+               a[12]=ny,
+               a[13]=ny,
+               a[14]=ny,
+               a[15]=ny,
+               b=not-y, out=ny-not-y);
+        //Inv_or_Notの出力をする。 -> y-Inv-or-Not-ny
+    Or16( a=not-ny-y, b=ny-not-y, out=y-Inv-or-Not-ny);
+//(zy,ny)でyを制御完了。
+
+//AndとAddを切り替える。
+    //x -> x-Inv-or-Not-nx
+    //y -> y-Inv-or-Not-ny
+        //!fを計算する。
+        Not( in=f, out=not-f);
+        //Andを計算する -> x-and-y
+        And16( a=x-Inv-or-Not-nx, b=y-Inv-or-Not-ny, out= x-and-y);
+        //Addを計算する -> x-add-y
+        Add16( a=x-Inv-or-Not-nx, b=y-Inv-or-Not-ny, out= x-add-y);
+        //fと!fで結合して出力 -> 
+        And16( a[0] =not-f,
+               a[1] =not-f,
+               a[2] =not-f,
+               a[3] =not-f,
+               a[4] =not-f,
+               a[5] =not-f,
+               a[6] =not-f,
+               a[7] =not-f,
+               a[8] =not-f,
+               a[9] =not-f,
+               a[10]=not-f,
+               a[11]=not-f,
+               a[12]=not-f,
+               a[13]=not-f,
+               a[14]=not-f,
+               a[15]=not-f,
+               b=x-and-y, out=not-f-and);
+        And16( a[0] =f,
+               a[1] =f,
+               a[2] =f,
+               a[3] =f,
+               a[4] =f,
+               a[5] =f,
+               a[6] =f,
+               a[7] =f,
+               a[8] =f,
+               a[9] =f,
+               a[10]=f,
+               a[11]=f,
+               a[12]=f,
+               a[13]=f,
+               a[14]=f,
+               a[15]=f,
+               b=x-add-y, out=f-add);
+    Or16( a=not-f-and, b=f-add, out=output-select-f);
+//fによる演算方法の指定完了。
+
+//noので出力を制御する
+    //!noを計算する
+    Not( in=no, out=not-no);
+    //!output-select-fを計算する
+    Not16( in=output-select-f, out=not-output);
+    //noでoutput-select-fを結合する。
+    And16( a[0] =not-no,
+           a[1] =not-no,
+           a[2] =not-no,
+           a[3] =not-no,
+           a[4] =not-no,
+           a[5] =not-no,
+           a[6] =not-no,
+           a[7] =not-no,
+           a[8] =not-no,
+           a[9] =not-no,
+           a[10]=not-no,
+           a[11]=not-no,
+           a[12]=not-no,
+           a[13]=not-no,
+           a[14]=not-no,
+           a[15]=not-no,
+           b=output-select-f, out=not-no-out);
+    And16( a[0] =no,
+           a[1] =no,
+           a[2] =no,
+           a[3] =no,
+           a[4] =no,
+           a[5] =no,
+           a[6] =no,
+           a[7] =no,
+           a[8] =no,
+           a[9] =no,
+           a[10]=no,
+           a[11]=no,
+           a[12]=no,
+           a[13]=no,
+           a[14]=no,
+           a[15]=no,
+           b=not-output, out=no-not-out);
+    Or16(  a=not-no-out, b=no-not-out, out=out-tmp);
+    And16( a=out-tmp,    b=true, out=out);
+//出力完了
+
+//outの状態でzr, ngを制御する。
+    And16( a=out-tmp, b=true, out[0..7]=out-lb, out[8..15]=out-hb, out[15]=ng);
+//zrを制御する。
+//各桁の和の論理否定を出力する。
+        Or8Way( in=out-lb, out=out-or-lb);
+        Or8Way( in=out-hb, out=out-or-hb);
+        Or( a=out-or-lb, b=out-or-hb, out=out-or);
+    Not( in=out-or, out=zr);
+
+//ngを制御する。
+//最上位ビットを出力する。すでに出力済みだが、こういう書き方で無理やり書くこともできる。
+//    And( a=out-msb, b=true, out=ng);
+}

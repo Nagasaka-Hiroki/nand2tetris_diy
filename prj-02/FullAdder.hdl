@@ -1,0 +1,50 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/02/FullAdder.hdl
+
+/**
+ * Computes the sum of three bits.
+ */
+
+CHIP FullAdder {
+    IN a, b, c;  // 1-bit inputs
+    OUT sum,     // Right bit of a + b + c
+        carry;   // Left bit of a + b + c
+
+    PARTS:
+    // Put you code here:
+
+    //実装の方針
+    /**
+    真偽値表を観察すると全加算器の出力は、明らかに、a==0の時半加算器の出力と一致している。
+    ゆえに内部に半加算器を持つ構造をしている。
+    半加算器half(b,c)への入力b,cの結果、出力sum(b,c)とcarry(b,c)はaの値の影響を受ける。
+    最終的な出力full(a,b,c)はhalf(b,c)の結果とaの値によって2通りの変化がある。
+    (1) sum(b,c)==1 かつ a==1 の時、桁あがりすなわちcarry(a,b,c)==1となる。
+    (2) sum(b,c)==0 かつ a==1 の時、sum(a,b,c)==1となる。
+    ゆえに、もう一つ半加算器を導入することが考えられる。
+    (2)の条件を実現するには、sum(b,c)とaを入力として、sum( a, sum(b,c))とすることで実現できそうだ。
+    ゆえに、half(b,c)の出力sum(b,c)とaを入力とするhalf( a,sum(b,c))の回路を実装する。
+    half( a,sum(b,c))の出力、carry( a,sum(b,c))は桁上がりに影響する。
+    ここで考えるべきは2つのcarry、carry( b, c)とcarry( a,sum(b,c))である。これらは同時に両者ともに1になることがない。
+    ゆえに桁あふれを考える必要がない。なぜなら、a==b==c==0b1でもa+b+c==0b11となり、全加算器の出力線2本が作る2進数の範囲、0b00 ~ 0b11の範囲(0 ~ 2^2-1)に収まるからである。
+    ゆえに2つのcarryの組み合わせは、せいぜい ( 0, 0) , ( 1, 0) , ( 0, 1)程度である。それぞれの組み合わせの結果は以下の通りであることが示されている。
+    ( 0, 0) -> 0
+    ( 0, 1) -> 1
+    ( 1, 0) -> 1
+    ※( 1, 1) -> 1 (不要だが一応こうすると完全なOrの真偽値表になる)
+    ゆえにこの演算はOrによって実現できる。以上から、
+    (1)を実現する方法は、carry(b,c)とcarry( a, sum(b,c))をOr演算することで実現できそうだ。
+    よって、全加算器は半加算器2個とOrの3つの素子で実装できそうである。
+    */
+
+    //half( b, c)を計算する。
+    HalfAdder( a=c, b=b, carry=carry-bc, sum=sum-bc);
+
+    //half( a, sum( b, c))を計算する。
+    HalfAdder( a=a, b=sum-bc, carry=carry-abc, sum=sum);
+
+    //Or( carry( b, c), carry( a, sum( b, c)))を計算する。
+    Or( a=carry-abc, b=carry-bc, out=carry);
+}
