@@ -1,0 +1,68 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/b/RAM16K.hdl
+
+/**
+ * Memory of 16K registers, each 16 bit-wide. Out holds the value
+ * stored at the memory location specified by address. If load==1, then 
+ * the in value is loaded into the memory location specified by address 
+ * (the loaded value will be emitted to out from the next time step onward).
+ */
+
+CHIP RAM16K {
+    IN in[16], load, address[14];
+    OUT out[16];
+
+    PARTS:
+    // Put your code here:
+
+    //実装の方針
+    /*
+        RAM4Kを4つ並列に並べる。
+    */
+
+    //loadをまず分岐する。
+    DMux4Way(in=load, sel=address[0..1], a=load-select-a,
+                                         b=load-select-b,
+                                         c=load-select-c,
+                                         d=load-select-d);
+
+    //inを分岐する。
+    DMux4Way(in=in[0] , sel=address[0..1], a=rg-a0,  b=rg-b0,  c=rg-c0,  d=rg-d0  ); 
+    DMux4Way(in=in[1] , sel=address[0..1], a=rg-a1,  b=rg-b1,  c=rg-c1,  d=rg-d1  ); 
+    DMux4Way(in=in[2] , sel=address[0..1], a=rg-a2,  b=rg-b2,  c=rg-c2,  d=rg-d2  ); 
+    DMux4Way(in=in[3] , sel=address[0..1], a=rg-a3,  b=rg-b3,  c=rg-c3,  d=rg-d3  ); 
+    DMux4Way(in=in[4] , sel=address[0..1], a=rg-a4,  b=rg-b4,  c=rg-c4,  d=rg-d4  ); 
+    DMux4Way(in=in[5] , sel=address[0..1], a=rg-a5,  b=rg-b5,  c=rg-c5,  d=rg-d5  ); 
+    DMux4Way(in=in[6] , sel=address[0..1], a=rg-a6,  b=rg-b6,  c=rg-c6,  d=rg-d6  ); 
+    DMux4Way(in=in[7] , sel=address[0..1], a=rg-a7,  b=rg-b7,  c=rg-c7,  d=rg-d7  ); 
+    DMux4Way(in=in[8] , sel=address[0..1], a=rg-a8,  b=rg-b8,  c=rg-c8,  d=rg-d8  ); 
+    DMux4Way(in=in[9] , sel=address[0..1], a=rg-a9,  b=rg-b9,  c=rg-c9,  d=rg-d9  ); 
+    DMux4Way(in=in[10], sel=address[0..1], a=rg-a10, b=rg-b10, c=rg-c10, d=rg-d10 ); 
+    DMux4Way(in=in[11], sel=address[0..1], a=rg-a11, b=rg-b11, c=rg-c11, d=rg-d11 ); 
+    DMux4Way(in=in[12], sel=address[0..1], a=rg-a12, b=rg-b12, c=rg-c12, d=rg-d12 ); 
+    DMux4Way(in=in[13], sel=address[0..1], a=rg-a13, b=rg-b13, c=rg-c13, d=rg-d13 ); 
+    DMux4Way(in=in[14], sel=address[0..1], a=rg-a14, b=rg-b14, c=rg-c14, d=rg-d14 ); 
+    DMux4Way(in=in[15], sel=address[0..1], a=rg-a15, b=rg-b15, c=rg-c15, d=rg-d15 ); 
+
+
+    RAM4K(in[0]=rg-a0, in[1]=rg-a1, in[2] =rg-a2 , in[3] =rg-a3 , in[4] =rg-a4 , in[5] =rg-a5 , in[6] =rg-a6 , in[7] =rg-a7 ,
+         in[8]=rg-a8, in[9]=rg-a9, in[10]=rg-a10, in[11]=rg-a11, in[12]=rg-a12, in[13]=rg-a13, in[14]=rg-a14, in[15]=rg-a15, address=address[2..13], load=load-select-a, out=out-rg-a);
+
+    RAM4K(in[0]=rg-b0, in[1]=rg-b1, in[2] =rg-b2 , in[3] =rg-b3 , in[4] =rg-b4 , in[5] =rg-b5 , in[6] =rg-b6 , in[7] =rg-b7 ,
+         in[8]=rg-b8, in[9]=rg-b9, in[10]=rg-b10, in[11]=rg-b11, in[12]=rg-b12, in[13]=rg-b13, in[14]=rg-b14, in[15]=rg-b15, address=address[2..13], load=load-select-b, out=out-rg-b);
+
+    RAM4K(in[0]=rg-c0, in[1]=rg-c1, in[2] =rg-c2 , in[3] =rg-c3 , in[4] =rg-c4 , in[5] =rg-c5 , in[6] =rg-c6 , in[7] =rg-c7 ,
+         in[8]=rg-c8, in[9]=rg-c9, in[10]=rg-c10, in[11]=rg-c11, in[12]=rg-c12, in[13]=rg-c13, in[14]=rg-c14, in[15]=rg-c15, address=address[2..13], load=load-select-c, out=out-rg-c);
+
+    RAM4K(in[0]=rg-d0, in[1]=rg-d1, in[2] =rg-d2 , in[3] =rg-d3 , in[4] =rg-d4 , in[5] =rg-d5 , in[6] =rg-d6 , in[7] =rg-d7 ,
+         in[8]=rg-d8, in[9]=rg-d9, in[10]=rg-d10, in[11]=rg-d11, in[12]=rg-d12, in[13]=rg-d13, in[14]=rg-d14, in[15]=rg-d15, address=address[2..13], load=load-select-d, out=out-rg-d);
+
+    
+    
+    Mux4Way16(out=out, sel=address[0..1], a=out-rg-a,
+                                          b=out-rg-b,
+                                          c=out-rg-c,
+                                          d=out-rg-d);
+}

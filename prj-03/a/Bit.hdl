@@ -1,0 +1,25 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/a/Bit.hdl
+
+/**
+ * 1-bit register:
+ * If load[t] == 1 then out[t+1] = in[t]
+ *                 else out does not change (out[t+1] = out[t])
+ */
+
+CHIP Bit {
+    IN in, load;
+    OUT out;
+
+    PARTS:
+
+    // Put your code here:
+
+    //マルチプレクサに出力と入力、入力切替信号を入力する。
+    Mux( a=output, b=in, sel=load, out=dff-in);
+
+    //フリップフロップから出力と再帰入力用の内部ピンを設定する。
+    DFF( in=dff-in, out=out, out=output);
+}

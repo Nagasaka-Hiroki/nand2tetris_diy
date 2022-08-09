@@ -1,0 +1,98 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/a/RAM8.hdl
+
+/**
+ * Memory of 8 registers, each 16 bit-wide. Out holds the value
+ * stored at the memory location specified by address. If load==1, then 
+ * the in value is loaded into the memory location specified by address 
+ * (the loaded value will be emitted to out from the next time step onward).
+ */
+
+CHIP RAM8 {
+    IN in[16], load, address[3];
+    OUT out[16];
+
+    PARTS:
+    // Put your code here:
+
+    //実装の方針
+    /*
+        RAM8なのでレジスタの数は8つ、アドレスを指定するバスは幅3である（address[3])。
+        ここのミソはaddress[3]をどのように指定のレジスタと紐づけるかであると思っている。
+
+        といってもデマルチプレクサのDMux8Wayをそのまま使うだけでうまくいきそうだと思う。
+        なので、DMux8Wayを16個つなげて実装を試みる。
+        また入力loadの切り替えも同様にデマルチプレクサで作れそうだ。
+        そして最後の出力はマルチプレクサで分岐するとうまくいきそうだと思う。
+    */
+    //DMux8Way(IN=in,sel[3]; OUT=a,b,c,d,e,f,g,h)
+    //Register(IN=in,load; OUT=out)
+    //Mux8Way16(IN=a[16],b[16],c[16],d[16],e[16],f[16],g[16],h[16],sel[3]; OUT=out[16] )
+
+    //addressをselに接続、loadはloadに、in,outは1本ずつ接続していく。
+
+    //loadをまず分岐する。
+    DMux8Way(in=load, sel=address, a=load-select-a,
+                                   b=load-select-b,
+                                   c=load-select-c,
+                                   d=load-select-d,
+                                   e=load-select-e,
+                                   f=load-select-f,
+                                   g=load-select-g,
+                                   h=load-select-h );
+
+    //inを分岐する。
+    DMux8Way(in=in[0] , sel=address, a=rg-a0,  b=rg-b0,  c=rg-c0,  d=rg-d0,  e=rg-e0,  f=rg-f0,  g=rg-g0,  h=rg-h0); 
+    DMux8Way(in=in[1] , sel=address, a=rg-a1,  b=rg-b1,  c=rg-c1,  d=rg-d1,  e=rg-e1,  f=rg-f1,  g=rg-g1,  h=rg-h1); 
+    DMux8Way(in=in[2] , sel=address, a=rg-a2,  b=rg-b2,  c=rg-c2,  d=rg-d2,  e=rg-e2,  f=rg-f2,  g=rg-g2,  h=rg-h2); 
+    DMux8Way(in=in[3] , sel=address, a=rg-a3,  b=rg-b3,  c=rg-c3,  d=rg-d3,  e=rg-e3,  f=rg-f3,  g=rg-g3,  h=rg-h3); 
+    DMux8Way(in=in[4] , sel=address, a=rg-a4,  b=rg-b4,  c=rg-c4,  d=rg-d4,  e=rg-e4,  f=rg-f4,  g=rg-g4,  h=rg-h4); 
+    DMux8Way(in=in[5] , sel=address, a=rg-a5,  b=rg-b5,  c=rg-c5,  d=rg-d5,  e=rg-e5,  f=rg-f5,  g=rg-g5,  h=rg-h5); 
+    DMux8Way(in=in[6] , sel=address, a=rg-a6,  b=rg-b6,  c=rg-c6,  d=rg-d6,  e=rg-e6,  f=rg-f6,  g=rg-g6,  h=rg-h6); 
+    DMux8Way(in=in[7] , sel=address, a=rg-a7,  b=rg-b7,  c=rg-c7,  d=rg-d7,  e=rg-e7,  f=rg-f7,  g=rg-g7,  h=rg-h7); 
+    DMux8Way(in=in[8] , sel=address, a=rg-a8,  b=rg-b8,  c=rg-c8,  d=rg-d8,  e=rg-e8,  f=rg-f8,  g=rg-g8,  h=rg-h8); 
+    DMux8Way(in=in[9] , sel=address, a=rg-a9,  b=rg-b9,  c=rg-c9,  d=rg-d9,  e=rg-e9,  f=rg-f9,  g=rg-g9,  h=rg-h9); 
+    DMux8Way(in=in[10], sel=address, a=rg-a10, b=rg-b10, c=rg-c10, d=rg-d10, e=rg-e10, f=rg-f10, g=rg-g10, h=rg-h10); 
+    DMux8Way(in=in[11], sel=address, a=rg-a11, b=rg-b11, c=rg-c11, d=rg-d11, e=rg-e11, f=rg-f11, g=rg-g11, h=rg-h11); 
+    DMux8Way(in=in[12], sel=address, a=rg-a12, b=rg-b12, c=rg-c12, d=rg-d12, e=rg-e12, f=rg-f12, g=rg-g12, h=rg-h12); 
+    DMux8Way(in=in[13], sel=address, a=rg-a13, b=rg-b13, c=rg-c13, d=rg-d13, e=rg-e13, f=rg-f13, g=rg-g13, h=rg-h13); 
+    DMux8Way(in=in[14], sel=address, a=rg-a14, b=rg-b14, c=rg-c14, d=rg-d14, e=rg-e14, f=rg-f14, g=rg-g14, h=rg-h14); 
+    DMux8Way(in=in[15], sel=address, a=rg-a15, b=rg-b15, c=rg-c15, d=rg-d15, e=rg-e15, f=rg-f15, g=rg-g15, h=rg-h15); 
+
+    //分岐させてものをレジスタに入力する。
+    Register(in[0]=rg-a0, in[1]=rg-a1, in[2] =rg-a2 , in[3] =rg-a3 , in[4] =rg-a4 , in[5] =rg-a5 , in[6] =rg-a6 , in[7] =rg-a7 ,
+             in[8]=rg-a8, in[9]=rg-a9, in[10]=rg-a10, in[11]=rg-a11, in[12]=rg-a12, in[13]=rg-a13, in[14]=rg-a14, in[15]=rg-a15, load=load-select-a, out=out-rg-a);
+
+    Register(in[0]=rg-b0, in[1]=rg-b1, in[2] =rg-b2 , in[3] =rg-b3 , in[4] =rg-b4 , in[5] =rg-b5 , in[6] =rg-b6 , in[7] =rg-b7 ,
+             in[8]=rg-b8, in[9]=rg-b9, in[10]=rg-b10, in[11]=rg-b11, in[12]=rg-b12, in[13]=rg-b13, in[14]=rg-b14, in[15]=rg-b15, load=load-select-b, out=out-rg-b);
+
+    Register(in[0]=rg-c0, in[1]=rg-c1, in[2] =rg-c2 , in[3] =rg-c3 , in[4] =rg-c4 , in[5] =rg-c5 , in[6] =rg-c6 , in[7] =rg-c7 ,
+             in[8]=rg-c8, in[9]=rg-c9, in[10]=rg-c10, in[11]=rg-c11, in[12]=rg-c12, in[13]=rg-c13, in[14]=rg-c14, in[15]=rg-c15, load=load-select-c, out=out-rg-c);
+
+    Register(in[0]=rg-d0, in[1]=rg-d1, in[2] =rg-d2 , in[3] =rg-d3 , in[4] =rg-d4 , in[5] =rg-d5 , in[6] =rg-d6 , in[7] =rg-d7 ,
+             in[8]=rg-d8, in[9]=rg-d9, in[10]=rg-d10, in[11]=rg-d11, in[12]=rg-d12, in[13]=rg-d13, in[14]=rg-d14, in[15]=rg-d15, load=load-select-d, out=out-rg-d);
+
+    Register(in[0]=rg-e0, in[1]=rg-e1, in[2] =rg-e2 , in[3] =rg-e3 , in[4] =rg-e4 , in[5] =rg-e5 , in[6] =rg-e6 , in[7] =rg-e7 ,
+             in[8]=rg-e8, in[9]=rg-e9, in[10]=rg-e10, in[11]=rg-e11, in[12]=rg-e12, in[13]=rg-e13, in[14]=rg-e14, in[15]=rg-e15, load=load-select-e, out=out-rg-e);
+
+    Register(in[0]=rg-f0, in[1]=rg-f1, in[2] =rg-f2 , in[3] =rg-f3 , in[4] =rg-f4 , in[5] =rg-f5 , in[6] =rg-f6 , in[7] =rg-f7 ,
+             in[8]=rg-f8, in[9]=rg-f9, in[10]=rg-f10, in[11]=rg-f11, in[12]=rg-f12, in[13]=rg-f13, in[14]=rg-f14, in[15]=rg-f15, load=load-select-f, out=out-rg-f);
+
+    Register(in[0]=rg-g0, in[1]=rg-g1, in[2] =rg-g2 , in[3] =rg-g3 , in[4] =rg-g4 , in[5] =rg-g5 , in[6] =rg-g6 , in[7] =rg-g7 ,
+             in[8]=rg-g8, in[9]=rg-g9, in[10]=rg-g10, in[11]=rg-g11, in[12]=rg-g12, in[13]=rg-g13, in[14]=rg-g14, in[15]=rg-g15, load=load-select-g, out=out-rg-g);
+
+    Register(in[0]=rg-h0, in[1]=rg-h1, in[2] =rg-h2 , in[3] =rg-h3 , in[4] =rg-h4 , in[5] =rg-h5 , in[6] =rg-h6 , in[7] =rg-h7 ,
+             in[8]=rg-h8, in[9]=rg-h9, in[10]=rg-h10, in[11]=rg-h11, in[12]=rg-h12, in[13]=rg-h13, in[14]=rg-h14, in[15]=rg-h15, load=load-select-h, out=out-rg-h);
+
+    //レジスタの出力を1つ選択する。
+    Mux8Way16(out=out, sel=address, a=out-rg-a,
+                                    b=out-rg-b,
+                                    c=out-rg-c,
+                                    d=out-rg-d,
+                                    e=out-rg-e,
+                                    f=out-rg-f,
+                                    g=out-rg-g,
+                                    h=out-rg-h );
+}

@@ -1,0 +1,96 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/a/PC.hdl
+
+/**
+ * A 16-bit counter with load and reset control bits.
+ * if      (reset[t] == 1) out[t+1] = 0
+ * else if (load[t] == 1)  out[t+1] = in[t]
+ * else if (inc[t] == 1)   out[t+1] = out[t] + 1  (integer addition)
+ * else                    out[t+1] = out[t]
+ */
+
+CHIP PC {
+    IN in[16],load,inc,reset;
+    OUT out[16];
+
+    PARTS:
+    // Put your code here:
+
+    //実装の方針
+    /*
+        まず書くピン入力の機能の要約を書く。
+        inc  : レジスタの値を+1して保存する
+        load : 任意の値にレジスタをセットする。
+        reset: レジスタの値を0にセットする。
+    */
+
+    //loadとincではloadのほうが優先である。そのためloadでマルチプレクサにより選択する
+    Mux( a=inc-output-0 , b=in[0] , sel=load, out=load-or-inc-0 );
+    Mux( a=inc-output-1 , b=in[1] , sel=load, out=load-or-inc-1 );
+    Mux( a=inc-output-2 , b=in[2] , sel=load, out=load-or-inc-2 );
+    Mux( a=inc-output-3 , b=in[3] , sel=load, out=load-or-inc-3 );
+    Mux( a=inc-output-4 , b=in[4] , sel=load, out=load-or-inc-4 );
+    Mux( a=inc-output-5 , b=in[5] , sel=load, out=load-or-inc-5 );
+    Mux( a=inc-output-6 , b=in[6] , sel=load, out=load-or-inc-6 );
+    Mux( a=inc-output-7 , b=in[7] , sel=load, out=load-or-inc-7 );
+    Mux( a=inc-output-8 , b=in[8] , sel=load, out=load-or-inc-8 );
+    Mux( a=inc-output-9 , b=in[9] , sel=load, out=load-or-inc-9 );
+    Mux( a=inc-output-10, b=in[10], sel=load, out=load-or-inc-10);
+    Mux( a=inc-output-11, b=in[11], sel=load, out=load-or-inc-11);
+    Mux( a=inc-output-12, b=in[12], sel=load, out=load-or-inc-12);
+    Mux( a=inc-output-13, b=in[13], sel=load, out=load-or-inc-13);
+    Mux( a=inc-output-14, b=in[14], sel=load, out=load-or-inc-14);
+    Mux( a=inc-output-15, b=in[15], sel=load, out=load-or-inc-15);
+    
+    //最優先はresetなので　!resetと論理和をとる。
+    Not( in=reset, out=not-reset);
+
+    And16( a[0]  =load-or-inc-0 , b[0]  =not-reset,
+           a[1]  =load-or-inc-1 , b[1]  =not-reset,
+           a[2]  =load-or-inc-2 , b[2]  =not-reset,
+           a[3]  =load-or-inc-3 , b[3]  =not-reset,
+           a[4]  =load-or-inc-4 , b[4]  =not-reset,
+           a[5]  =load-or-inc-5 , b[5]  =not-reset,
+           a[6]  =load-or-inc-6 , b[6]  =not-reset,
+           a[7]  =load-or-inc-7 , b[7]  =not-reset,
+           a[8]  =load-or-inc-8 , b[8]  =not-reset,
+           a[9]  =load-or-inc-9 , b[9]  =not-reset,
+           a[10] =load-or-inc-10, b[10] =not-reset,
+           a[11] =load-or-inc-11, b[11] =not-reset,
+           a[12] =load-or-inc-12, b[12] =not-reset,
+           a[13] =load-or-inc-13, b[13] =not-reset,
+           a[14] =load-or-inc-14, b[14] =not-reset,
+           a[15] =load-or-inc-15, b[15] =not-reset, out=rg-input);
+
+    //レジスタに対するloadは　load = load + inc + resetとするとうまくいくはず
+    Or( a=load, b=inc, out=load-inc);
+    Or( a=load-inc, b=reset, out=rg-load);
+
+    //16ビットの任意の値をセットするのはレジスタを用いればできそうだ。
+    //仕様メモ　Register(IN=in[16],load; OUT=out[16])
+    Register(in=rg-input, load=rg-load, out=out, out=inc-input);
+
+    //インクリメンタでレジスタの値を+1する。
+    //仕様メモ Inc16(IN=in[16], OUT=out[16])
+    Inc16(in=inc-input, out=rg-inc);
+
+    //有効な出力にするためにincと掛け算する
+    And16( a=rg-inc, b[0]  =inc, out[0]=inc-output-0 ,
+                     b[1]  =inc, out[1]=inc-output-1 ,
+                     b[2]  =inc, out[2]=inc-output-2 ,
+                     b[3]  =inc, out[3]=inc-output-3 ,
+                     b[4]  =inc, out[4]=inc-output-4 ,
+                     b[5]  =inc, out[5]=inc-output-5 ,
+                     b[6]  =inc, out[6]=inc-output-6 ,
+                     b[7]  =inc, out[7]=inc-output-7 ,
+                     b[8]  =inc, out[8]=inc-output-8 ,
+                     b[9]  =inc, out[9]=inc-output-9 ,
+                     b[10] =inc, out[10]=inc-output-10,
+                     b[11] =inc, out[11]=inc-output-11,
+                     b[12] =inc, out[12]=inc-output-12,
+                     b[13] =inc, out[13]=inc-output-13,
+                     b[14] =inc, out[14]=inc-output-14,
+                     b[15] =inc, out[15]=inc-output-15);
+}
