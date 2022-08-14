@@ -9,3 +9,7 @@
 /prj*/*/*.tst
 /prj*/*/*.cmp
 /prj*/*/*.out
+
+#*.hackを管理から除外する
+/prj*/*.hack
+/prj*/*/*.hack

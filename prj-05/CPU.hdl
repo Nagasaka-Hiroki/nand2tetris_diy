@@ -1,0 +1,235 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/05/CPU.hdl
+
+/**
+ * The Hack CPU (Central Processing unit), consisting of an ALU,
+ * two registers named A and D, and a program counter named PC.
+ * The CPU is designed to fetch and execute instructions written in 
+ * the Hack machine language. In particular, functions as follows:
+ * Executes the inputted instruction according to the Hack machine 
+ * language specification. The D and A in the language specification
+ * refer to CPU-resident registers, while M refers to the external
+ * memory location addressed by A, i.e. to Memory[A]. The inM input 
+ * holds the value of this location. If the current instruction needs 
+ * to write a value to M, the value is placed in outM, the address 
+ * of the target location is placed in the addressM output, and the 
+ * writeM control bit is asserted. (When writeM==0, any value may 
+ * appear in outM). The outM and writeM outputs are combinational: 
+ * they are affected instantaneously by the execution of the current 
+ * instruction. The addressM and pc outputs are clocked: although they 
+ * are affected by the execution of the current instruction, they commit 
+ * to their new values only in the next time step. If reset==1 then the 
+ * CPU jumps to address 0 (i.e. pc is set to 0 in next time step) rather 
+ * than to the address resulting from executing the current instruction. 
+ */
+
+CHIP CPU {
+
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset==1) or continue executing
+                         // the current program (reset==0).
+
+    OUT outM[16],        // M value output
+        writeM,          // Write to M? 
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+
+    PARTS:
+    // Put your code here:
+
+    //実装の方針　→　README.mdに記述
+    
+    //マルチプレクサでALU outとinstructionを選択しAレジスタに格納
+    //instruction[15]==0の時A命令でAレジスタに格納
+    Mux( a=instruction[15], b=ALU-out-15 , sel=instruction[15], out=a-rg15 );
+    Mux( a=instruction[14], b=ALU-out-14 , sel=instruction[15], out=a-rg14 );
+    Mux( a=instruction[13], b=ALU-out-13 , sel=instruction[15], out=a-rg13 );
+    Mux( a=instruction[12], b=ALU-out-12 , sel=instruction[15], out=a-rg12 );
+    Mux( a=instruction[11], b=ALU-out-11 , sel=instruction[15], out=a-rg11 );
+    Mux( a=instruction[10], b=ALU-out-10 , sel=instruction[15], out=a-rg10 );
+    Mux( a=instruction[9],  b=ALU-out-09 , sel=instruction[15], out=a-rg09 );
+    Mux( a=instruction[8],  b=ALU-out-08 , sel=instruction[15], out=a-rg08 );
+    Mux( a=instruction[7],  b=ALU-out-07 , sel=instruction[15], out=a-rg07 );
+    Mux( a=instruction[6],  b=ALU-out-06 , sel=instruction[15], out=a-rg06 );
+    Mux( a=instruction[5],  b=ALU-out-05 , sel=instruction[15], out=a-rg05 );
+    Mux( a=instruction[4],  b=ALU-out-04 , sel=instruction[15], out=a-rg04 );
+    Mux( a=instruction[3],  b=ALU-out-03 , sel=instruction[15], out=a-rg03 );
+    Mux( a=instruction[2],  b=ALU-out-02 , sel=instruction[15], out=a-rg02 );
+    Mux( a=instruction[1],  b=ALU-out-01 , sel=instruction[15], out=a-rg01 );
+    Mux( a=instruction[0],  b=ALU-out-00 , sel=instruction[15], out=a-rg00 );
+    //Aレジスタに格納する。
+    //制御ビットはd1である。
+    ARegister(in[15]= a-rg15, out[15]=a-rg-out-15,
+              in[14]= a-rg14, out[14]=a-rg-out-14,
+              in[13]= a-rg13, out[13]=a-rg-out-13,
+              in[12]= a-rg12, out[12]=a-rg-out-12,
+              in[11]= a-rg11, out[11]=a-rg-out-11,
+              in[10]= a-rg10, out[10]=a-rg-out-10,
+              in[9] = a-rg09, out[9] =a-rg-out-09,
+              in[8] = a-rg08, out[8] =a-rg-out-08,
+              in[7] = a-rg07, out[7] =a-rg-out-07,
+              in[6] = a-rg06, out[6] =a-rg-out-06,
+              in[5] = a-rg05, out[5] =a-rg-out-05,
+              in[4] = a-rg04, out[4] =a-rg-out-04,
+              in[3] = a-rg03, out[3] =a-rg-out-03,
+              in[2] = a-rg02, out[2] =a-rg-out-02,
+              in[1] = a-rg01, out[1] =a-rg-out-01,
+              in[0] = a-rg00, out[0] =a-rg-out-00, load=d1, out[0..14]=addressM);
+    //マルチプレクサでメモリ出力とAレジスタ出力を制御する。
+    //制御ビットはabitである。
+    Mux( a=a-rg-out-15,  b=inM[15], sel=a-bit, out=ALU-in-y15 );
+    Mux( a=a-rg-out-14,  b=inM[14], sel=a-bit, out=ALU-in-y14 );
+    Mux( a=a-rg-out-13,  b=inM[13], sel=a-bit, out=ALU-in-y13 );
+    Mux( a=a-rg-out-12,  b=inM[12], sel=a-bit, out=ALU-in-y12 );
+    Mux( a=a-rg-out-11,  b=inM[11], sel=a-bit, out=ALU-in-y11 );
+    Mux( a=a-rg-out-10,  b=inM[10], sel=a-bit, out=ALU-in-y10 );
+    Mux( a=a-rg-out-09,  b=inM[9],  sel=a-bit, out=ALU-in-y09 );
+    Mux( a=a-rg-out-08,  b=inM[8],  sel=a-bit, out=ALU-in-y08 );
+    Mux( a=a-rg-out-07,  b=inM[7],  sel=a-bit, out=ALU-in-y07 );
+    Mux( a=a-rg-out-06,  b=inM[6],  sel=a-bit, out=ALU-in-y06 );
+    Mux( a=a-rg-out-05,  b=inM[5],  sel=a-bit, out=ALU-in-y05 );
+    Mux( a=a-rg-out-04,  b=inM[4],  sel=a-bit, out=ALU-in-y04 );
+    Mux( a=a-rg-out-03,  b=inM[3],  sel=a-bit, out=ALU-in-y03 );
+    Mux( a=a-rg-out-02,  b=inM[2],  sel=a-bit, out=ALU-in-y02 );
+    Mux( a=a-rg-out-01,  b=inM[1],  sel=a-bit, out=ALU-in-y01 );
+    Mux( a=a-rg-out-00,  b=inM[0],  sel=a-bit, out=ALU-in-y00 );
+    //DレジスタにALU出力を格納する。
+    //制御ビットはd2である。
+    DRegister(in[15]=ALU-out-15 , out[15]=d-rg-out-15,
+              in[14]=ALU-out-14 , out[14]=d-rg-out-14,
+              in[13]=ALU-out-13 , out[13]=d-rg-out-13,
+              in[12]=ALU-out-12 , out[12]=d-rg-out-12,
+              in[11]=ALU-out-11 , out[11]=d-rg-out-11,
+              in[10]=ALU-out-10 , out[10]=d-rg-out-10,
+              in[9] =ALU-out-09 , out[9] =d-rg-out-09,
+              in[8] =ALU-out-08 , out[8] =d-rg-out-08,
+              in[7] =ALU-out-07 , out[7] =d-rg-out-07,
+              in[6] =ALU-out-06 , out[6] =d-rg-out-06,
+              in[5] =ALU-out-05 , out[5] =d-rg-out-05,
+              in[4] =ALU-out-04 , out[4] =d-rg-out-04,
+              in[3] =ALU-out-03 , out[3] =d-rg-out-03,
+              in[2] =ALU-out-02 , out[2] =d-rg-out-02,
+              in[1] =ALU-out-01 , out[1] =d-rg-out-01,
+              in[0] =ALU-out-00 , out[0] =d-rg-out-00, load=d2);
+    //ALUに入力し計算する。x<-D, y<-A
+    ALU(x[15]=d-rg-out-15 , y[15]=ALU-in-y15,
+        x[14]=d-rg-out-14 , y[14]=ALU-in-y14,
+        x[13]=d-rg-out-13 , y[13]=ALU-in-y13,
+        x[12]=d-rg-out-12 , y[12]=ALU-in-y12,
+        x[11]=d-rg-out-11 , y[11]=ALU-in-y11,
+        x[10]=d-rg-out-10 , y[10]=ALU-in-y10,
+        x[9] =d-rg-out-09 , y[9] =ALU-in-y09,
+        x[8] =d-rg-out-08 , y[8] =ALU-in-y08,
+        x[7] =d-rg-out-07 , y[7] =ALU-in-y07,
+        x[6] =d-rg-out-06 , y[6] =ALU-in-y06,
+        x[5] =d-rg-out-05 , y[5] =ALU-in-y05,
+        x[4] =d-rg-out-04 , y[4] =ALU-in-y04,
+        x[3] =d-rg-out-03 , y[3] =ALU-in-y03,
+        x[2] =d-rg-out-02 , y[2] =ALU-in-y02,
+        x[1] =d-rg-out-01 , y[1] =ALU-in-y01,
+        x[0] =d-rg-out-00 , y[0] =ALU-in-y00,
+        zx=c1, nx=c2, zy=c3, ny=c4, f=c5, no=c6,
+        zr   =JEQ         , ng   =JLT        ,
+        out=outM,
+        out[15]=ALU-out-15,
+        out[14]=ALU-out-14,
+        out[13]=ALU-out-13,
+        out[12]=ALU-out-12,
+        out[11]=ALU-out-11,
+        out[10]=ALU-out-10,
+        out[9] =ALU-out-09,
+        out[8] =ALU-out-08,
+        out[7] =ALU-out-07,
+        out[6] =ALU-out-06,
+        out[5] =ALU-out-05,
+        out[4] =ALU-out-04,
+        out[3] =ALU-out-03,
+        out[2] =ALU-out-02,
+        out[1] =ALU-out-01,
+        out[0] =ALU-out-00
+    );
+    //PCを設置する
+    //制御ビットはpc-load, pc-inc
+    PC(in[14]=a-rg-out-14,
+       in[13]=a-rg-out-13,
+       in[12]=a-rg-out-12,
+       in[11]=a-rg-out-11,
+       in[10]=a-rg-out-10,
+       in[9] =a-rg-out-09,
+       in[8] =a-rg-out-08,
+       in[7] =a-rg-out-07,
+       in[6] =a-rg-out-06,
+       in[5] =a-rg-out-05,
+       in[4] =a-rg-out-04,
+       in[3] =a-rg-out-03,
+       in[2] =a-rg-out-02,
+       in[1] =a-rg-out-01,
+       in[0] =a-rg-out-00,
+       reset=reset, load=pc-load, inc=pc-inc,
+       out[0..14]=pc);
+
+    //これでC命令のiビット、aビット、cビット、dビット、jビットの接続先
+    //iビット　→　instruction[15]
+    //aビット　→　a-bit
+    //c1~c6　　→　ALU
+    //d1    　→　Aレジスタ
+    //d2      →　Dレジスタ
+    //d3    　→　writeM
+    //j1~j3   →　pc-load, pc-inc
+
+    //ゆえに各制御ビットをデコードするデコーダを作成する。
+    //ROMからのプログラムinstruction[16]をデコードする。
+    Mux( sel=instruction[15], a=false, b=instruction[12], out=a-bit);
+
+    Mux( sel=instruction[15], a=true , b=instruction[11], out=c1);
+    Mux( sel=instruction[15], a=false, b=instruction[10], out=c2);
+    Mux( sel=instruction[15], a=true , b=instruction[9] , out=c3);
+    Mux( sel=instruction[15], a=false, b=instruction[8] , out=c4);
+    Mux( sel=instruction[15], a=true , b=instruction[7] , out=c5);
+    Mux( sel=instruction[15], a=false, b=instruction[6] , out=c6);
+
+    Mux( sel=instruction[15], a=true , b=instruction[5] , out=d1);
+    Mux( sel=instruction[15], a=false, b=instruction[4] , out=d2);
+    Mux( sel=instruction[15], a=false, b=instruction[3] , out=writeM);//d3==writeM
+
+    Mux( sel=instruction[15], a=false, b=instruction[2] , out=j1);
+    Mux( sel=instruction[15], a=false, b=instruction[1] , out=j2);
+    Mux( sel=instruction[15], a=false, b=instruction[0] , out=j3);
+
+    //jビットはさらにデコードする。
+    //ALUからのzr, ngは zr=JEQ, ng=JLT としている。
+    //論理式を計算して内部ピンを作る。
+    //NJP → false
+    //JGT
+    And(a=JGE, b=JNE, out=JGT);
+    //zr → JEQ
+    //!ng →　JGE
+    Not( in=JLT, out=JGE);
+    //ng -> JLT
+    //!zr →　JNE
+    Not( in=JEQ, out=JNE);
+    //ng+zr → JLE
+    Or( a=JLT, b=JEQ, out=JLE);
+    //true → JMP
+
+    //3段のマルチプレクサで使用する内部ピンを選定する。
+    //制御ビットはj1,j2,j3である。
+
+    //1段目、制御ビット j1
+    Mux( sel=j1, a=false, b=JLT,  out=Mux0);
+    Mux( sel=j1, a=JGT  , b=JNE,  out=Mux1);
+    Mux( sel=j1, a=JEQ  , b=JLE,  out=Mux2);
+    Mux( sel=j1, a=JGE  , b=true, out=Mux3);
+    //2段目、制御ビット j2
+    Mux( sel=j2, a=Mux0 , b=Mux2, out=Mux02);
+    Mux( sel=j2, a=Mux1 , b=Mux3, out=Mux13);
+    //3段目、制御ビット j3
+    Mux( sel=j3, a=Mux02, b=Mux13,out=pc-load);
+    //pc-inc == !pc-loadなので
+    Not( in=pc-load, out=pc-inc);
+
+}

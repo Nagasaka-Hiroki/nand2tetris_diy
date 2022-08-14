@@ -1,0 +1,156 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/05/Memory.hdl
+
+/**
+ * The complete address space of the Hack computer's memory,
+ * including RAM and memory-mapped I/O. 
+ * The chip facilitates read and write operations, as follows:
+ *     Read:  out(t) = Memory[address(t)](t)
+ *     Write: if load(t-1) then Memory[address(t-1)](t) = in(t-1)
+ * In words: the chip always outputs the value stored at the memory 
+ * location specified by address. If load==1, the in value is loaded 
+ * into the memory location specified by address. This value becomes 
+ * available through the out output from the next time step onward.
+ * Address space rules:
+ * Only the upper 16K+8K+1 words of the Memory chip are used. 
+ * Access to address>0x6000 is invalid. Access to any address in 
+ * the range 0x4000-0x5FFF results in accessing the screen memory 
+ * map. Access to address 0x6000 results in accessing the keyboard 
+ * memory map. The behavior in these addresses is described in the 
+ * Screen and Keyboard chip specifications given in the book.
+ */
+
+CHIP Memory {
+    IN in[16], load, address[15];
+    OUT out[16];
+
+    PARTS:
+    // Put your code here:
+
+    //実装の方針 →　README.mdに記述
+
+    //先頭ビットが0かどうか
+    DMux( sel=address[14], in=in[15], a=ram-16-15, b=not-ram-16-15);
+    DMux( sel=address[14], in=in[14], a=ram-16-14, b=not-ram-16-14);
+    DMux( sel=address[14], in=in[13], a=ram-16-13, b=not-ram-16-13);
+    DMux( sel=address[14], in=in[12], a=ram-16-12, b=not-ram-16-12);
+    DMux( sel=address[14], in=in[11], a=ram-16-11, b=not-ram-16-11);
+    DMux( sel=address[14], in=in[10], a=ram-16-10, b=not-ram-16-10);
+    DMux( sel=address[14], in=in[9] , a=ram-16-9 , b=not-ram-16-9 );
+    DMux( sel=address[14], in=in[8] , a=ram-16-8 , b=not-ram-16-8 );
+    DMux( sel=address[14], in=in[7] , a=ram-16-7 , b=not-ram-16-7 );
+    DMux( sel=address[14], in=in[6] , a=ram-16-6 , b=not-ram-16-6 );
+    DMux( sel=address[14], in=in[5] , a=ram-16-5 , b=not-ram-16-5 );
+    DMux( sel=address[14], in=in[4] , a=ram-16-4 , b=not-ram-16-4 );
+    DMux( sel=address[14], in=in[3] , a=ram-16-3 , b=not-ram-16-3 );
+    DMux( sel=address[14], in=in[2] , a=ram-16-2 , b=not-ram-16-2 );
+    DMux( sel=address[14], in=in[1] , a=ram-16-1 , b=not-ram-16-1 );
+    DMux( sel=address[14], in=in[0] , a=ram-16-0 , b=not-ram-16-0 );
+    DMux( sel=address[14], in=load  , a=ram-16-load, b=not-ram-16-load);
+    RAM16K( in[15]=ram-16-15, out[15]=ram-16-out-15, address=address[0..13], load=ram-16-load,
+            in[14]=ram-16-14, out[14]=ram-16-out-14,
+            in[13]=ram-16-13, out[13]=ram-16-out-13,
+            in[12]=ram-16-12, out[12]=ram-16-out-12,
+            in[11]=ram-16-11, out[11]=ram-16-out-11,
+            in[10]=ram-16-10, out[10]=ram-16-out-10,
+            in[9] =ram-16-9 , out[9] =ram-16-out-9 ,
+            in[8] =ram-16-8 , out[8] =ram-16-out-8 ,
+            in[7] =ram-16-7 , out[7] =ram-16-out-7 ,
+            in[6] =ram-16-6 , out[6] =ram-16-out-6 ,
+            in[5] =ram-16-5 , out[5] =ram-16-out-5 ,
+            in[4] =ram-16-4 , out[4] =ram-16-out-4 ,
+            in[3] =ram-16-3 , out[3] =ram-16-out-3 ,
+            in[2] =ram-16-2 , out[2] =ram-16-out-2 ,
+            in[1] =ram-16-1 , out[1] =ram-16-out-1 ,
+            in[0] =ram-16-0 , out[0] =ram-16-out-0 );
+    //address[13]==0ならスクリーン
+    DMux( sel=address[13], in=not-ram-16-15, a=ram-4k-15, b=rg-15);
+    DMux( sel=address[13], in=not-ram-16-14, a=ram-4k-14, b=rg-14);
+    DMux( sel=address[13], in=not-ram-16-13, a=ram-4k-13, b=rg-13);
+    DMux( sel=address[13], in=not-ram-16-12, a=ram-4k-12, b=rg-12);
+    DMux( sel=address[13], in=not-ram-16-11, a=ram-4k-11, b=rg-11);
+    DMux( sel=address[13], in=not-ram-16-10, a=ram-4k-10, b=rg-10);
+    DMux( sel=address[13], in=not-ram-16-9 , a=ram-4k-9 , b=rg-9 );
+    DMux( sel=address[13], in=not-ram-16-8 , a=ram-4k-8 , b=rg-8 );
+    DMux( sel=address[13], in=not-ram-16-7 , a=ram-4k-7 , b=rg-7 );
+    DMux( sel=address[13], in=not-ram-16-6 , a=ram-4k-6 , b=rg-6 );
+    DMux( sel=address[13], in=not-ram-16-5 , a=ram-4k-5 , b=rg-5 );
+    DMux( sel=address[13], in=not-ram-16-4 , a=ram-4k-4 , b=rg-4 );
+    DMux( sel=address[13], in=not-ram-16-3 , a=ram-4k-3 , b=rg-3 );
+    DMux( sel=address[13], in=not-ram-16-2 , a=ram-4k-2 , b=rg-2 );
+    DMux( sel=address[13], in=not-ram-16-1 , a=ram-4k-1 , b=rg-1 );
+    DMux( sel=address[13], in=not-ram-16-0 , a=ram-4k-0 , b=rg-0 );
+    DMux( sel=address[13], in=not-ram-16-load , a=ram-4k-load , b=rg-load );
+    //スクリーン
+    Screen(in[15]=ram-4k-15, out[15]=ram-4k-out-15,
+           in[14]=ram-4k-14, out[14]=ram-4k-out-14,
+           in[13]=ram-4k-13, out[13]=ram-4k-out-13,
+           in[12]=ram-4k-12, out[12]=ram-4k-out-12,
+           in[11]=ram-4k-11, out[11]=ram-4k-out-11,
+           in[10]=ram-4k-10, out[10]=ram-4k-out-10,
+           in[9] =ram-4k-9 , out[9] =ram-4k-out-9 ,
+           in[8] =ram-4k-8 , out[8] =ram-4k-out-8 ,
+           in[7] =ram-4k-7 , out[7] =ram-4k-out-7 ,
+           in[6] =ram-4k-6 , out[6] =ram-4k-out-6 ,
+           in[5] =ram-4k-5 , out[5] =ram-4k-out-5 ,
+           in[4] =ram-4k-4 , out[4] =ram-4k-out-4 ,
+           in[3] =ram-4k-3 , out[3] =ram-4k-out-3 ,
+           in[2] =ram-4k-2 , out[2] =ram-4k-out-2 ,
+           in[1] =ram-4k-1 , out[1] =ram-4k-out-1 ,
+           in[0] =ram-4k-0 , out[0] =ram-4k-out-0 , load=ram-4k-load, address=address[0..12]);
+    //キーボード
+    Keyboard(out[15]=rg-out-15,
+             out[14]=rg-out-14,
+             out[13]=rg-out-13,
+             out[12]=rg-out-12,
+             out[11]=rg-out-11,
+             out[10]=rg-out-10,
+             out[9] =rg-out-9 ,
+             out[8] =rg-out-8 ,
+             out[7] =rg-out-7 ,
+             out[6] =rg-out-6 ,
+             out[5] =rg-out-5 ,
+             out[4] =rg-out-4 ,
+             out[3] =rg-out-3 ,
+             out[2] =rg-out-2 ,
+             out[1] =rg-out-1 ,
+             out[0] =rg-out-0 );
+
+    //メモリ出力を取り出す。これまでと逆の操作
+    //スクリーンとキーボード
+    Mux(sel=address[13], a=ram-4k-out-15, b=rg-out-15, out=not-ram-16-out-15);
+    Mux(sel=address[13], a=ram-4k-out-14, b=rg-out-14, out=not-ram-16-out-14);
+    Mux(sel=address[13], a=ram-4k-out-13, b=rg-out-13, out=not-ram-16-out-13);
+    Mux(sel=address[13], a=ram-4k-out-12, b=rg-out-12, out=not-ram-16-out-12);
+    Mux(sel=address[13], a=ram-4k-out-11, b=rg-out-11, out=not-ram-16-out-11);
+    Mux(sel=address[13], a=ram-4k-out-10, b=rg-out-10, out=not-ram-16-out-10);
+    Mux(sel=address[13], a=ram-4k-out-9 , b=rg-out-9 , out=not-ram-16-out-9 );
+    Mux(sel=address[13], a=ram-4k-out-8 , b=rg-out-8 , out=not-ram-16-out-8 );
+    Mux(sel=address[13], a=ram-4k-out-7 , b=rg-out-7 , out=not-ram-16-out-7 );
+    Mux(sel=address[13], a=ram-4k-out-6 , b=rg-out-6 , out=not-ram-16-out-6 );
+    Mux(sel=address[13], a=ram-4k-out-5 , b=rg-out-5 , out=not-ram-16-out-5 );
+    Mux(sel=address[13], a=ram-4k-out-4 , b=rg-out-4 , out=not-ram-16-out-4 );
+    Mux(sel=address[13], a=ram-4k-out-3 , b=rg-out-3 , out=not-ram-16-out-3 );
+    Mux(sel=address[13], a=ram-4k-out-2 , b=rg-out-2 , out=not-ram-16-out-2 );
+    Mux(sel=address[13], a=ram-4k-out-1 , b=rg-out-1 , out=not-ram-16-out-1 );
+    Mux(sel=address[13], a=ram-4k-out-0 , b=rg-out-0 , out=not-ram-16-out-0 );
+    //メモリ16Kとそれ以外を選択
+    Mux(sel=address[14], a=ram-16-out-15, b=not-ram-16-out-15, out=out[15]);
+    Mux(sel=address[14], a=ram-16-out-14, b=not-ram-16-out-14, out=out[14]);
+    Mux(sel=address[14], a=ram-16-out-13, b=not-ram-16-out-13, out=out[13]);
+    Mux(sel=address[14], a=ram-16-out-12, b=not-ram-16-out-12, out=out[12]);
+    Mux(sel=address[14], a=ram-16-out-11, b=not-ram-16-out-11, out=out[11]);
+    Mux(sel=address[14], a=ram-16-out-10, b=not-ram-16-out-10, out=out[10]);
+    Mux(sel=address[14], a=ram-16-out-9 , b=not-ram-16-out-9 , out=out[9]);
+    Mux(sel=address[14], a=ram-16-out-8 , b=not-ram-16-out-8 , out=out[8]);
+    Mux(sel=address[14], a=ram-16-out-7 , b=not-ram-16-out-7 , out=out[7]);
+    Mux(sel=address[14], a=ram-16-out-6 , b=not-ram-16-out-6 , out=out[6]);
+    Mux(sel=address[14], a=ram-16-out-5 , b=not-ram-16-out-5 , out=out[5]);
+    Mux(sel=address[14], a=ram-16-out-4 , b=not-ram-16-out-4 , out=out[4]);
+    Mux(sel=address[14], a=ram-16-out-3 , b=not-ram-16-out-3 , out=out[3]);
+    Mux(sel=address[14], a=ram-16-out-2 , b=not-ram-16-out-2 , out=out[2]);
+    Mux(sel=address[14], a=ram-16-out-1 , b=not-ram-16-out-1 , out=out[1]);
+    Mux(sel=address[14], a=ram-16-out-0 , b=not-ram-16-out-0 , out=out[0]);
+}
